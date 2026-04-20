@@ -2,37 +2,35 @@ const db = require('../config/db')
 
 const Author = {
 
-    findAll: async (search = '') => {
+    getAll: async () => {
+        const [rows] = await db.query('CALL sp_get_all_authors()')
+        return rows[0]
+    },
+
+    searchByNames: async (search = '') => {
         const normalizedSearch = search.trim()
 
-        let query = `
-            SELECT id, firstName, lastName, birthDate, nationality, email
-            FROM author
-        `
-        let params = []
-
-        if (normalizedSearch) {
-            query += `
-                WHERE firstName LIKE ? 
-                   OR lastName LIKE ?
-            `
-            const pattern = `%${normalizedSearch}%`
-            params = [pattern, pattern]
+        if (!normalizedSearch) {
+            return []
         }
 
-        const [rows] = await db.query(query, params)
-        return rows
+        const [rows] = await db.query(
+            'CALL sp_search_authors_by_names(?)',
+            [normalizedSearch]
+        )
+        return rows[0]
     },
 
     create: async ({ firstName, lastName, birthDate, nationality, email }) => {
         const [result] = await db.query(
-            `INSERT INTO author (firstName, lastName, birthDate, nationality, email) 
-             VALUES (?, ?, ?, ?, ?)`,
+            'CALL sp_create_author(?, ?, ?, ?, ?)',
             [firstName, lastName, birthDate, nationality, email]
         )
 
+        const id = result[0][0].id
+
         return {
-            id: result.insertId,
+            id,
             firstName,
             lastName,
             birthDate,
@@ -43,22 +41,22 @@ const Author = {
 
     update: async (id, { firstName, lastName, birthDate, nationality, email }) => {
         const [result] = await db.query(
-            `UPDATE author 
-             SET firstName = ?, lastName = ?, birthDate = ?, nationality = ?, email = ?
-             WHERE id = ?`,
-            [firstName, lastName, birthDate, nationality, email, id]
+            'CALL sp_update_author(?, ?, ?, ?, ?, ?)',
+            [id, firstName, lastName, birthDate, nationality, email]
         )
 
-        return result.affectedRows > 0
+        const affectedRows = result[0][0].affectedRows
+        return affectedRows > 0
     },
 
     delete: async (id) => {
         const [result] = await db.query(
-            `DELETE FROM author WHERE id = ?`,
+            'CALL sp_delete_author(?)',
             [id]
         )
 
-        return result.affectedRows > 0
+        const affectedRows = result[0][0].affectedRows
+        return affectedRows > 0
     }
 }
 

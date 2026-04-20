@@ -3,7 +3,14 @@ const author = require('../models/Author')
 const getAllAuthors = async (req, res) => {
     try {
         const search = req.query.search ?? req.query.q ?? ''
-        const authors = await author.findAll(search)
+
+        let authors
+
+        if (search.trim()) {
+            authors = await author.searchByNames(search)
+        } else {
+            authors = await author.getAll()
+        }
 
         res.json({
             success: true,

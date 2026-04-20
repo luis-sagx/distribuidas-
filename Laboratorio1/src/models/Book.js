@@ -3,24 +3,22 @@ const db = require('../config/db')
 const Book = {
 
     getAll: async () => {
-        const [rows] = await db.query('SELECT * FROM book')
-        return rows
+        const [rows] = await db.query('CALL sp_get_all_books()')
+        return rows[0]
     },
 
     create: async ({ title, isbn, publicationYear, edition, language, authorId }) => {
-        const query = `
-            INSERT INTO book (title, isbn, publicationYear, edition, language, authorId) 
-            VALUES (?, ?, ?, ?, ?, ?)
-        `
+        const [result] = await db.query(
+            'CALL sp_create_book(?, ?, ?, ?, ?, ?)',
+            [title, isbn, publicationYear, edition, language, authorId]
+        )
 
-        const values = [title, isbn, publicationYear, edition, language, authorId]
-
-        const [result] = await db.query(query, values)
+        const id = result[0][0].id
 
         return {
             message: "Book created successfully",
             data: {
-                id: result.insertId,
+                id,
                 title,
                 isbn,
                 publicationYear,
@@ -32,35 +30,34 @@ const Book = {
     },
 
     update: async ({ title, isbn, publicationYear, edition, language, authorId }, id) => {
-        const query = `
-            UPDATE book 
-            SET title = ?, isbn = ?, publicationYear = ?, edition = ?, language = ?, authorId = ?
-            WHERE id = ?
-        `
+        const [result] = await db.query(
+            'CALL sp_update_book(?, ?, ?, ?, ?, ?, ?)',
+            [id, title, isbn, publicationYear, edition, language, authorId]
+        )
 
-        const values = [title, isbn, publicationYear, edition, language, authorId, id]
-
-        const [result] = await db.query(query, values)
+        const affectedRows = result[0][0].affectedRows
 
         return {
-            message: result.affectedRows > 0
+            message: affectedRows > 0
                 ? "Book updated successfully"
                 : "Book not found",
-            affectedRows: result.affectedRows
+            affectedRows
         }
     },
 
     delete: async (id) => {
         const [result] = await db.query(
-            'DELETE FROM book WHERE id = ?',
+            'CALL sp_delete_book(?)',
             [id]
         )
 
+        const affectedRows = result[0][0].affectedRows
+
         return {
-            message: result.affectedRows > 0
+            message: affectedRows > 0
                 ? "Book deleted successfully"
                 : "Book not found",
-            affectedRows: result.affectedRows
+            affectedRows
         }
     }
 }
