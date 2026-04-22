@@ -169,3 +169,9 @@ BEGIN
     SELECT ROW_COUNT() as affectedRows;
 END //
 DELIMITER ;
+
+-- ============================================
+-- GRANT PERMISSIONS
+-- ============================================
+GRANT ALL PRIVILEGES ON biblioteca-distribuida.* TO 'app_user'@'%';
+FLUSH PRIVILEGES;
