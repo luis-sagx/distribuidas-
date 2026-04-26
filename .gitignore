@@ -1,16 +1,16 @@
 proyecto*/
 
 # node modules de todos los proyectos
-*/node_modules/
+**/node_modules/
 # archivos de log
 *.log
 # archivos de entorno
 *.env
 # archivos de build
-*/dist/
-*/build/
+**/dist/
+**/build/
 # archivos de cobertura de pruebas
-*/coverage/
+**/coverage/
 # archivos de configuración de IDEs
 .idea/
 .vscode/
