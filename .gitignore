@@ -1,0 +1,19 @@
+proyecto*/
+
+# node modules de todos los proyectos
+*/node_modules/
+# archivos de log
+*.log
+# archivos de entorno
+*.env
+# archivos de build
+*/dist/
+*/build/
+# archivos de cobertura de pruebas
+*/coverage/
+# archivos de configuración de IDEs
+.idea/
+.vscode/
+# archivos de sistema
+.DS_Store
+Thumbs.db
