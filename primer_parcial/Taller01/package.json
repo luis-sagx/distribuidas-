@@ -5,6 +5,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "build": "tsc",
+    "start:multi": "node dist/server-multi.js",
+    "start:client": "node dist/client.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
