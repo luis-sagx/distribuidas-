@@ -56,12 +56,15 @@ server_socket.setblocking(False)
 print(f"Servidor principal escuchando en el puerto: {MAIN_PORT}")
 
 offload_next_client = False
-client_sockets = set()
+client_queue = []
 client_addresses = {}
 
 try:
     while True:
-        sockets_to_read = [server_socket, *client_sockets]
+        sockets_to_read = [server_socket]
+        if client_queue:
+            sockets_to_read.append(client_queue[0])
+
         readable, _, exceptional = select.select(sockets_to_read, [], sockets_to_read, 0.5)
 
         if server_socket in readable:
@@ -69,58 +72,58 @@ try:
                 try:
                     client_socket, addr = server_socket.accept() # Acepta conexión entrante
                     client_socket.setblocking(False)
-                    client_sockets.add(client_socket)
+                    client_queue.append(client_socket)
                     client_addresses[client_socket] = addr
                     print(f"Conexión aceptada de {addr}")
                 except BlockingIOError:
                     break
 
-        for sock in readable:
-            if sock is server_socket:
-                continue
+        if client_queue:
+            current_client = client_queue[0]
+            if current_client in readable:
+                addr = client_addresses.get(current_client, ("desconocido", 0))
+                try:
+                    data = current_client.recv(1024).decode('utf-8') # Recibe datos del cliente
+                except OSError:
+                    data = ""
 
-            addr = client_addresses.get(sock, ("desconocido", 0))
-            try:
-                data = sock.recv(1024).decode('utf-8') # Recibe datos del cliente
-            except OSError:
-                data = ""
-
-            if data:
-                if offload_next_client:
-                    offload_result = process_with_multi_server(data)
-                    if offload_result is not None:
-                        result = offload_result
-                        print(f"Cliente {addr} atendido por server-multi ({MULTI_HOST}:{MULTI_PORT}).")
+                if data:
+                    if offload_next_client:
+                        offload_result = process_with_multi_server(data)
+                        if offload_result is not None:
+                            result = offload_result
+                            print(f"Cliente {addr} atendido por server-multi ({MULTI_HOST}:{MULTI_PORT}).")
+                        else:
+                            result = process_operation(data)
+                            print(f"server-multi no disponible; cliente {addr} atendido localmente.")
+                        offload_next_client = False
                     else:
                         result = process_operation(data)
-                        print(f"server-multi no disponible; cliente {addr} atendido localmente.")
-                    offload_next_client = False
+
+                    try:
+                        current_client.send(result.encode('utf-8')) # Envía el resultado de vuelta al cliente
+                    except OSError:
+                        pass
                 else:
-                    result = process_operation(data)
+                    print(f"No se recibieron datos del cliente {addr}.")
+                    try:
+                        current_client.send("Error: Invalid input format".encode('utf-8'))
+                    except OSError:
+                        pass
 
-                try:
-                    sock.send(result.encode('utf-8')) # Envía el resultado de vuelta al cliente
-                except OSError:
-                    pass
-            else:
-                print(f"No se recibieron datos del cliente {addr}.")
-                try:
-                    sock.send("Error: Invalid input format".encode('utf-8'))
-                except OSError:
-                    pass
-
-            sock.close() # Cierra la conexión con el cliente
-            client_sockets.discard(sock)
-            client_addresses.pop(sock, None)
+                current_client.close() # Cierra la conexión con el cliente
+                client_queue.pop(0)
+                client_addresses.pop(current_client, None)
 
         for sock in exceptional:
             if sock is server_socket:
                 continue
             sock.close()
-            client_sockets.discard(sock)
+            if sock in client_queue:
+                client_queue.remove(sock)
             client_addresses.pop(sock, None)
 
-        if len(client_sockets) > 1 and not offload_next_client:
+        if len(client_queue) > 1 and not offload_next_client:
             offload_next_client = True
             print("Carga detectada: el siguiente cliente se delegará al servidor multihilo.")
 
@@ -128,6 +131,6 @@ except KeyboardInterrupt:
     print("Servidor detenido por el usuario.")
 
 finally:
-    for sock in client_sockets:
+    for sock in client_queue:
         sock.close()
     server_socket.close()
