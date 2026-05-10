@@ -1,0 +1,483 @@
+\documentclass[12pt,a4paper]{book}
+
+% Paquetes necesarios
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{amsmath}
+
+% Configuración de página
+\geometry{margin=2.5cm}
+
+% Definición de colores
+\definecolor{azul}{RGB}{0,51,102}
+\definecolor{gris}{RGB}{128,128,128}
+
+% Configuración de títulos
+\titleformat{\chapter}[block]{\Large\bfseries\color{azul}}{\thechapter.}{0.5em}{}
+\titleformat{\section}[block]{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}[block]{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+
+% Configuración de encabezados
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE,RO]{\thepage}
+\fancyhead[RE]{\nouppercase\leftmark}
+\fancyfoot{}
+
+% Datos del documento
+\title{Informe de Aplicaciones Distribuidas}
+\author{Ingeniería de Software - 7mo Semestre}
+\date{\today}
+
+\begin{document}
+
+% Página de título
+\begin{titlepage}
+    \centering
+    \vspace*{3cm}
+    {\Huge\bfseries\color{azul} APLICACIONES DISTRIBUIDAS\par}
+    \vspace{1cm}
+    {\LARGE Informe Académico\par}
+    \vspace{3cm}
+    {\large\textbf{Universidad Nacional}\par}
+    {\large Escuela Superior de Politécnica\par}
+    \vspace{2cm}
+    {\large Carrera de Ingeniería de Software\par}
+    {\large 7mo Semestre\par}
+    \vspace{3cm}
+    {\large\theauthor\par}
+    \vspace{1cm}
+    {\large\thedate\par}
+\end{titlepage}
+
+% Tabla de contenidos
+\tableofcontents
+
+% Lista de figuras
+\listoffigures
+
+% Lista de tablas
+\listoftables
+
+% Prólogo
+\frontmatter
+\chapter*{Prólogo}
+\addcontentsline{toc}{chapter}{Prólogo}
+
+El presente documento constituye un análisis exhaustivo de los conceptos fundamentales relacionados con las aplicaciones distribuidas, tema central dentro del currículo de la carrera de Ingeniería de Software. Las aplicaciones distribuidas representan un paradigma de desarrollo de software que ha transformado radicalmente la manera en que las organizaciones diseñan, implementan y operan sus sistemas informáticos. Este informe tiene como objetivo proporcionar una comprensión profunda de los principios teóricos y las prácticas fundamentales que sustentan este campo del conocimiento.
+
+La computación distribuida ha evolucionado significativamente desde sus orígenes en las décadas de 1960 y 1970, cuando los sistemas mainframes dominaban el panorama tecnológico. En la actualidad, servicios como Netflix, Google Docs y otras plataformas que utilizamos a diario operan bajo este paradigma, permitiendo que millones de usuarios interactúen simultáneamente con sistemas complejos sin necesariamente comprender la infraestructura que hace posible dicha experiencia.
+
+A lo largo de este informe, abordaremos desde los conceptos más básicos, como la distinción entre programa, aplicación y sistema, hasta aspectos más avanzados como el teorema CAP y la gestión de concurrencia en entornos distribuidos. El objetivo no es únicamente proporcionar información, sino desarrollar una comprensión genuina de cómo funcionan estos sistemas y por qué se diseñan de determinada manera.
+
+\mainmatter
+
+\chapter{Introducción}
+
+Las aplicaciones distribuidas constituyen uno de los pilares fundamentales de la computación moderna. Para comprender plenamente este paradigma, resulta esencial establecer primero una distinción clara entre los conceptos básicos que conforman el vocabulario técnico de esta disciplina: programa, aplicación y sistema. Estas tres nociones, aunque frecuentemente utilizadas de manera intercambiable en el lenguaje cotidiano, poseen significados técnicos precisos que es necesario dominar para el desarrollo de nuestro estudio.
+
+\section{Programa}
+
+Un programa representa la unidad más básica de software dentro de la jerarquía que analizaremos. Técnicamente, consiste en un conjunto de instrucciones que la computadora ejecuta de manera secuencial para realizar una tarea específica y delimitada. Los programas son fundamentalmente reactivos: reciben entrada, procesan según instrucciones predefinidas y producen una salida. No requieren necesariamente de una interfaz gráfica de usuario para funcionar, como exemplifica el comando \texttt{ls} en sistemas Linux o un script en Python que renombra archivos automáticamente. La naturaleza de un programa es, por tanto, focalizada y específica, orientada a cumplir una función particular dentro de un contexto más amplio.
+
+\section{Aplicación}
+
+Una aplicación, en contraste, representa software diseñado específicamente para interacción con el usuario final. Mientras que un programa puede existir como herramienta técnica sin interfaz visible, toda aplicación presupone la existencia de algún mecanismo de interacción humana. Las aplicaciones abarcan un espectro amplio de propósitos, desde productividad como Microsoft Word o hojas de cálculo, hasta comunicación como aplicaciones de mensajería, entretenimiento como plataformas de streaming, o diseño gráfico. La característica distintiva de una aplicación reside en su orientación hacia la utilidad práctica y la experiencia del usuario, requiriendo siempre un sistema operativo como plataforma base para su ejecución.
+
+\section{Sistema}
+
+Finalmente, un sistema representa el concepto más amplio de los tres. Un sistema informático constituye una colección de componentes interconectados que trabajan de manera coordinada para lograr objetivos complejos que ninguna de sus partes podría alcanzar individualmente. La característica distintiva de los sistemas reside en su naturaleza integradora: combinan hardware, software, redes y frecuentemente personas para funcionar como un todo coherente. Un ejemplo paradigmático sería un sistema de gestión hospitalaria, que integra aplicaciones para médicos, pacientes y personal administrativo, una base de datos centralizada, servidores, infraestructura de red y personal operativo, todos coordinados para cumplir la función global de gestionar un hospital.
+
+\section{Resumen Comparativo}
+
+La distinción fundamental puede expresarse de manera simple pero profunda: una aplicación hace algo útil para el usuario individual, mientras que un sistema integra múltiples partes para lograr objetivos complejos que trascienden las capacidades individuales de cada componente.
+
+\chapter{Ventajas y Desafíos de las Aplicaciones Distribuidas}
+
+Las aplicaciones distribuidas ofrecen un conjunto significativo de ventajas que las hacen atractivas para organizaciones de todos los tamaños, pero también presentan desafíos técnicos que requieren consideración cuidadosa durante el diseño e implementación. Comprender tanto los beneficios como las limitaciones resulta esencial para tomar decisiones arquitectónicas informadas.
+
+\section{Ventajas Fundamentales}
+
+\subsection{Escalabilidad Horizontal}
+
+Una de las ventajas más significativas de los sistemas distribuidos radica en su capacidad de escalabilidad horizontal, es decir, la posibilidad de agregar nuevos nodos al sistema para manejar incrementos en la carga de trabajo sin degradar el rendimiento existente. Esta forma de escalar difiere fundamentalmente de la escalabilidad vertical, que implica agregar más recursos a un servidor individual.
+
+En un sistema centralizado tradicional, cuando la demanda supera la capacidad del servidor, la única opción viable consiste en actualizar dicho servidor con componentes más potentes, lo cual implica costos significativos y eventualmente límites físicos. Por el contrario, en un sistema distribuido, ante un incremento de carga, simplemente se incorporan servidores adicionales al clúster. Esta aproximación resulta particularmente valiosa en escenarios con demandas fluctuantes, como el comercio electrónico durante eventos como el Black Friday, donde el tráfico puede incrementarse órdenes de magnitud respecto a la operación normal.
+
+La escalabilidad horizontal ofrece además ventajas económicas: permite pagar exactamente por la capacidad utilizada, ajustando los recursos de manera dinámica según las necesidades del momento, característica central de los servicios de cloud computing modernos.
+
+\subsection{Alta Disponibilidad y Tolerancia a Fallos}
+
+Los sistemas distribuidos pueden diseñarse para continuar operando incluso cuando algunos de sus componentes fallan. Esta característica representa un requisito crítico para aplicaciones críticas donde el tiempo de inactividad implica pérdidas significativas, ya sean económicas o de reputación.
+
+La tolerancia a fallos se logra principalmente mediante redundancia: múltiples nodos realizan las mismas funciones, de modo que si uno falla, los demás automáticamente asumen su carga. El patrón Circuit Breaker ejemplifica este principio: cuando un servicio detecta fallos repetidos en otro servicio del cual depende, abre el circuito temporalmente, evitando saturar el servicio degradado y permitiendo que este se recupere. Esta aproximación previene el efecto cascada donde un fallo puntual escala hasta afectar todo el sistema.
+
+Un ejemplo práctico lo constituyen los sistemas de bancos: si un servidor de base de datos falla, otro servidor redundante toma su lugar transparentemente, y los usuarios continúan realizando transacciones sin notar interrupción.
+
+\subsection{Mejor Rendimiento mediante Procesamiento Paralelo}
+
+Los sistemas distribuidos permiten dividir tareas computacionalmente intensivas entre múltiples nodos, reduciendo drásticamente el tiempo total de ejecución. Esta capacidad resulta fundamental para cargas de trabajo como el procesamiento de grandes volúmenes de datos en aplicaciones Big Data o el entrenamiento de modelos de inteligencia artificial.
+
+Frameworks como Apache Spark permiten procesar terabytes de datos distribuyéndolos a través de clústeres de cientos de máquinas, accomplishingando en minutos tareas que ejecutar secuencialmente requerirían días o semanas.
+
+\subsection{Compartición Eficiente de Recursos}
+
+Los sistemas distribuidos permiten la compartición de recursos costosos entre múltiples usuarios y aplicaciones. Una grid de cómputo puede permitir que organizaciones compartan equipamiento especializado como unidades de procesamiento gráfico de alto rendimiento o almacenamiento masivo, optimizando la inversión en infraestructura.
+
+Esta compartición resulta particularmente valiosa en entornos académicos y de investigación donde el costo de equipamiento especializado supera frecuentemente los recursos individuales disponibles.
+
+\subsection{Flexibilidad Tecnológica}
+
+En arquitecturas basadas en microservicios, cada servicio puede utilizar la tecnología más apropiada para su función específica. Un servicio de procesamiento de imágenes podría utilizar Python con sus librerías especializadas, mientras otro servicio de procesamiento de transacciones podría utilizar Java por su estabilidad comprobada. Esta flexibilidad permite a las organizaciones adoptar innovaciones tecnológicas de manera incremental sin requerir reescrituras completas del sistema.
+
+\section{Desventajas y Desafíos Técnicos}
+
+Las ventajas anteriormente descritas no vienen sin costos asociados. Es fundamental comprender las desventajas para diseñar sistemas que las mitiguen efectivamente.
+
+\subsection{Complejidad de Desarrollo y Mantenimiento}
+
+La complejidad constituye quizás el desafío más significativo de los sistemas distribuidos. Mientras un sistema monolítico puede comunicarse mediante llamadas locales de función, los sistemas distribuidos requieren coordinación de comunicación asíncrona entre servicios. Los fallos distribuidos son particularmente difíciles de diagnosticar: un error puede manifestarse en un servicio pero tener su origen en otro completamente diferente.
+
+Adicionalmente, mantener compatibilidad entre versiones de servicios que evolucionan independientemente requiere disciplina y herramientas especializadas de gestión de cambios.
+
+\subsection{Costos Operativos Elevados}
+
+Los sistemas distribuidos requieren infraestructura adicional que incrementa los costos operacionales: mayor tráfico de red entre nodos, herramientas sofisticadas de monitoreo y trazabilidad, medidas de seguridad robustas, y personal especializado capaz de mantener y depurar sistemas complejos. La complejidad operativa frecuentemente supera los costos de desarrollo inicial.
+
+\subsection{Sobrecarga de Red y Procesamiento}
+
+La comunicación entre nodos distribuidos consume ancho de banda significativo. Cada comunicación requiere serialización de datos, transmisión, y frecuentemente cifrado, añadiendo latencia a las operaciones. Si los protocolos no se diseñan cuidadosamente, la sobrecarga de comunicación puede superar los beneficios del procesamiento distribuido.
+
+Diseñar sistemas que minimicen la comunicación entre nodos, almacenando datos en caché localmente cuando sea posible, constituye una técnica fundamental para optimizar el rendimiento.
+
+\subsection{Superficie de Ataque Expandida}
+
+Cada nodo adicional representa un potencial punto de vulnerabilidad. Los sistemas distribuidos requieren defensa en profundidad: múltiples capas de seguridad que protejan cada componente y la comunicación entre ellos. El monitoreo constante resulta esencial para detectar ataques antes de que causen daño significativo.
+
+\subsection{Dificultad con Coherencia Fuerte}
+
+Mantener consistencia inmediata de datos entre múltiples nodos distribuidos presenta desafíos fundamentales. El teorema CAP, que desarrollaremos posteriormente, demuestra que en presencia de particiones de red, debe elegirse entre consistencia y disponibilidad. La mayoría de sistemas distribuidos opta por coherencia eventual, donde las actualizaciones se propagan gradualmente entre réplicas, lo cual puede no ser aceptable para aplicaciones que requieren información absolutamente actualizada.
+
+\section{Manejo de Transacciones Distribuidas}
+
+Las transacciones distribuidas presentan desafíos particulares. Mientras las transacciones locales pueden usar propiedades ACID (Atomicidad, Consistencia, Aislamiento, Durabilidad), implementar ACID en entornos distribuidos resulta extremadamente difícil debido a la latencia de red y la posibilidad de fallos parciales.
+
+El protocolo Two-Phase Commit (2PC) aborda este problema mediante dos etapas: una fase de preparación donde todos los participantes prometen completar la transacción, seguida de una fase de compromiso donde se ejecuta efectivamente. Sin embargo, 2PC tiene limitaciones significativas en escenarios de fallos.
+
+Three-Phase Commit (3PC) mejora la robustez mediante una fase adicional, pero introduce mayor complejidad.
+
+Las transacciones SAGA representan una aproximación alternativa: en lugar de intentar aislamiento absoluto, dividen una transacción distribuida en pasos locales individuales. Si algún paso falla, se ejecutan compensaciones que revierten los pasos anteriores. Esta aproximación resulta particularmente útil en microservicios donde bloquear recursos distribuidos sería impractico.
+
+La elección entre estas aproximaciones depende de los requisitos específicos de cada aplicación.
+
+\chapter{Evolución de los Sistemas Informáticos}
+
+La historia de los sistemas distribuidos refleja la evolución más amplia de la computación. Comprender esta evolución proporciona contexto para comprender las decisiones arquitectónicas contemporáneas.
+
+\section{Sistemas Centralizados versus Distribuidos}
+
+En un sistema centralizado, todos los componentes están ubicados en un lugar físico específico, típicamente un servidor principal que procesa todas las solicitudes. Los usuarios acceden mediante terminales ligeras que únicamente muestran información sin capacidad de procesamiento propria. Este modelo dominó la computación durante las décadas de 1960 y 1970.
+
+Los sistemas distribuidos, en contraste, distribuyen componentes a través de múltiples máquinas físicas que se comunican a través de una red. El usuario percibe una aplicación única, como si estuviera ejecutándose localmente, cuando en realidad múltiples servidores colaboran entre sí para hacer posible esa experiencia.
+
+\section{Cronología Histórica}
+
+\subsection{Décadas de 1960 y 1970: Orígenes}
+
+Los orígenes de la computación distribuida datan de este período formativo. En 1961, el MIT desarrolló CTSS (Compatible Time-Sharing System), el primer sistema operativo multiusuario y multitarea, sentando las bases para la computación interactiva.
+
+1969 marcó dos hitos fundamentales: el nacimiento de Unix en AT\&T Bell Labs, que transformó el desarrollo de sistemas operativos, y más importante, ARPANET, el precursor de Internet. ARPANET interconnectó computadoras de investigación permitiendo comunicación entre instituciones, estableciendo las bases técnicas de la distribución moderna.
+
+En 1972 nació el correo electrónico, una de las primeras aplicaciones verdaderamente distribuidas de uso generalizado.
+
+\subsection{Década de 1980: Redes Locales y Modelo Cliente-Servidor}
+
+El surgimiento de redes locales Ethernet en 1980 transformó la computación corporativa al permitir que computadoras personales compartieran recursos. El modelo cliente-servidor se estableció como estándar: servicios centralizados accesibles desde múltiples clientes.
+
+En 1982 se inició la conferencia PODC (Principles of Distributed Computing), que estableció el estudio académico de sistemas distribuidos como disciplina formal. Investigaciones como el proyecto ANSA de DARPA en 1985 avanzaron la comprensión teórica de estos sistemas.
+
+En 1989, el Object Management Group (OMG) publicó las primeras especificaciones de CORBA, estableciendo un estándar para comunicación entre objetos distribuidos.
+
+\subsection{Década de 1990: Objetos Distribuidos y Middleware}
+
+La década de 1990 presenció la maduración de tecnologías de middleware. En 1990, CORBA alcanzó su primera especificación formal, y para 1992 existían implementaciones comerciales capaces de comunicar objetos entre diferentes lenguajes y plataformas.
+
+En 1995, Java RMI (Remote Method Invocation) permitió que objetos Java invocaran métodos en otras máquinas virtuales Java, introduciendo el concepto de invocación remota de métodos al desarrollo principal.
+
+El CGI (Common Gateway Interface) de 1993 permitió la creación de páginas web dinámicas, estableciendo las bases para la web moderna.
+
+\subsection{Década de 2000: Servicios Web y SOA}
+
+El año 2000 marcó un punto de inflexión con la introducción de REST (Representational State Transfer) por Roy Fielding, que estableció un estilo arquitectónico para servicios web que continúa predominando. REST aprovecha el protocolo HTTP de manera nativa, utilizando sus métodos para representar operaciones sobre recursos.
+
+Simultáneamente, los Web Services basados en SOAP (Simple Object Access Protocol) proporcionaron una aproximación más formal a la comunicación entre servicios mediante XML.
+
+En 2005, SOA (Service-Oriented Architecture) emergió como metodología de diseño que organiza sistemas como colecciones de servicios interactivos, reutilizables y bien definidos.
+
+Las primeras plataformas de cloud computing aparecieron en 2007-2008, con Google App Engine pionera en ofrecer plataforma como servicio.
+
+\subsection{Década de 2010: Contenedores, Microservicios y Cloud}
+
+La década de 2010 transformó fundamentalmente la operación de sistemas distribuidos. Docker, introducido en 2013, revolucionó el empaquetado de aplicaciones mediante contenedores: paquetes ligeros que incluyen la aplicación y todas sus dependencias, funcionando consistentemente entre entornos.
+
+En 2014, AWS Lambda introdujo computación serverless, donde el proveedor gestiona la infraestructura completamente y el desarrollador únicamente escribe funciones que se ejecutan en respuesta a eventos.
+
+Kubernetes, en 2015, proporcionó orquestación de contenedores a escala, permitiendo que clústeres de contenedores se comportaran como un sistema único con autoparación, balanceo de carga y escalamiento automático.
+
+El patrón de microservicios se consolidó como arquitectura dominante, dividiendo aplicaciones en servicios pequeños, independientes y desplegables individualmente.
+
+\subsection{Década de 2020: Cloud-Native y Más Allá}
+
+Cloud-Native emergió como paradigma que designa aplicaciones diseñadas específicamente para ejecutarse en entornos cloud, aprovechando contenedores, microservicios, Kubernetes y prácticas DevOps.
+
+Las arquitecturas orientadas a eventos ganaron relevancia, donde los componentes reaccionan a eventos en lugar de llamadas directas, proporcionando acoplamiento aún más débil.
+
+Service mesh proporciona una capa de infraestructura dedicada a manejar la comunicación entre servicios, abstraciendo preocupaciones de red como balanceo, seguridad y monitoreo.
+
+GitOps establece la práctica de gestionar infraestructura y aplicaciones mediante Git como fuente de verdad, permitiendo entrega continua automatizada.
+
+\chapter{Falacias de la Computación Distribuida}
+
+En 1990, Peter Deutsch y otros investigadores de Sun Microsystems formularon lo que posteriormente se conocería como las ocho falacias de la computación distribuida: suposiciones que los desarrolladores frecuentemente hacen al diseñar sistemas distribuidos y que invariablemente resultan incorrectas, causando fallos significativos en producción.
+
+La comprensión de estas falacias resulta fundamental para diseñar sistemas robustos que contemplen las realidades de la computación distribuida.
+
+\section{Primera Falacia: La Red es Confiable}
+
+La primera y más fundamental falacia consiste en asumir que la red siempre estará disponible y no presentará fallos. En realidad, las redes fallan con frecuencia considerable: cortes de fibra óptica, fallos de equipamiento hardware, problemas de proveedores de internet, congestionamiento intermitente.
+
+Los diseñadores de sistemas confiables deben asumir que la red fallará eventualmente y diseñar sus sistemas para manejar tales situaciones de manera elegante. Esto incluye lógica de reintentos con retroceso exponencial, interruptores de circuito, y capacidad de operación en modo degradado cuando la conectividad entre componentes se interrumpe.
+
+\section{Segunda Falacia: La Latencia es Cero}
+
+Asumir que la comunicación entre componentes distribuidos es instantánea constituye una suposición peligrosa. La latencia de red, aunque frecuentemente medida en milisegundos, nunca es cero y puede variar significativamente según la distancia geográfica entre nodos, el estado de congestionamiento de la red, y el protocolo utilizado.
+
+Para aplicaciones que requieren respuesta inmediata, como aplicaciones financieras de alta frecuencia o sistemas de tiempo real, la latencia de red puede representar el factor limitante del rendimiento. Estrategias como almacenamiento en caché local, obtención anticipada de datos, y optimización de protocolos resultan esenciales.
+
+\section{Tercera Falacia: El Ancho de Banda es Infinito}
+
+Aunque las redes modernas ofrecen capacidades significativamente mayores que antaño, el ancho de banda permanece finito y puede convertirse en cuello de botella crítico cuando múltiples servicios compiten por recursos de red.
+
+El diseño cuidadoso de protocolos de comunicación, compresión de datos, y arquitectura que minimice la cantidad de datos transferidos resulta crítica para sistemas de alto rendimiento.
+
+\section{Cuarta Falacia: La Red es Segura}
+
+Asumir que la comunicación entre componentes es inherentemente segura representa una falacia particularmente peligrosa. Las redes pueden ser vulnerables a múltiples tipos de ataques que comprometen la confidencialidad, integridad y disponibilidad de los datos.
+
+El sniffing constituye una técnica mediante la cual atacantes interceptan y analizan el tráfico de red para capturar datos sensibles como contraseñas, información personal o datos financieros. El ataque Man in the Middle representa otro vector donde el atacante intercepta y modifica la comunicación entre dos partes sin su conocimiento.
+
+Los ataques DDoS (Distributed Denial of Service) sobrecargan sistemas objetivo con tráfico masivo, frecuentemente utilizando redes de dispositivos comprometidos, volviéndolos inaccesibles para usuarios legítimos.
+
+Medidas de seguridad robustas resultan esenciales: cifrado en tránsito, autenticación mutua, firma de código, y monitoreo constante de actividad sospechosa.
+
+\section{Quinta Falacia: la Topología de la Red No Cambia}
+
+Asumir que la estructura de la red permanece estática ignora que las redes evolucionan constantemente debido a fallos de equipamiento, actualizaciones de infraestructura, y cambios en los requerimientos de la organización. Las aplicaciones diseñadas asumiendo topologías fijas frecuentemente fallan cuando la realidad de la red cambia.
+
+Los sistemas bien diseñados deben ser tolerantes a cambios en la topología de red, utilizando descubrimiento de servicios dinámico que permita a los servicios localizarse automáticamente independientemente de su ubicación física.
+
+\section{Sexta Falacia: Hay un Solo Administrador}
+
+En entornos distribuidos complejos, particularmente aquellos que abarcan múltiples organizaciones o proveedores, puede existir múltiples administradores con diferentes intereses, políticas y niveles de acceso. Asumir control unificado raramente refleja la realidad.
+
+Las políticas de seguridad deben contemplar la realidad de múltiples administradores, con mecanismos de autenticación y autorización que funcionen en entornos federados.
+
+\section{Séptima Falacia: El Costo de Transporte es Cero}
+
+Aunque frecuentemente ignorado, el transporte de datos tiene costos asociados: consumo de ancho de banda, latencia acumulada, costos de infraestructura de red. Aplicaciones que transfieren grandes volúmenes de datos sin considerar estos costos pueden发现自己 con facturas inesperadamente altas.
+
+El diseño de sistemas debe considerar optimización de datos transferidos, compresión, y políticas de retención que minimicen la cantidad de datos en tránsito.
+
+\section{Octava Falacia: La Red es Homogénea}
+
+Asumir que todos los componentes de la red tienen las mismas capacidades ignora la realidad de entornos heterogéneos con dispositivos de diferentes fabricantes, capacidades, y estados de mantenimiento.
+
+Los sistemas deben diseñarse contemplando esta heterogeneidad, con abstracciones que permitan a servicios con diferentes capacidades coexistir y comunicarse efectivamente.
+
+\section{Edge Computing}
+
+Las falacias adquieren relevancia adicional con la emergencia de Edge Computing, un paradigma que acerca el procesamiento de datos a la fuente de generación, reduciendo la dependencia de nubes centralizadas y potencialmente mitigando algunos efectos de las falacias.
+
+En edge computing, el procesamiento ocurre cerca de la fuente de datos, ya sean dispositivos IoT, vehículos autónomos, o equipamiento industrial. Este enfoque reduce latencia y requisitos de ancho de banda, pero introduce complejidad adicional al dividir el procesamiento entre edge y cloud.
+
+\chapter{El Teorema CAP}
+
+El teorema CAP, propuesto por Eric Brewer en 2000, establece los límites fundamentales de los sistemas distribuidos y continúa guiando decisiones arquitectónicas más de dos décadas después de su formulación original.
+
+\section{Las Tres Propiedades}
+
+El teorema considera tres propiedades que los sistemas distribuidos pueden proporcionar:
+
+\subsection{Consistencia}
+
+En un sistema consistente, todos los nodos ven la misma información al mismo tiempo. Cuando un nodo actualiza un dato, dicha actualización debe propagarse a todos los nodos antes de que cualquier operación de lectura pueda retornar un resultado. La consistencia fuerte garantiza que cualquier lectura posterior a una escritura verá siempre el valor escrito.
+
+Esta propiedad resulta fundamental para aplicaciones donde la exactitud de los datos es crítica, como sistemas financieros o de inventario.
+
+\subsection{Disponibilidad}
+
+Un sistema disponible responde a todas las solicitudes, incluso si algunos nodos han fallado. La disponibilidad no garantiza que los datos estén actualizados, pero el sistema permanece accesible y responde a peticiones de usuarios.
+
+Para aplicaciones orientadas al consumidor, como comercio electrónico, la disponibilidad frecuentemente supera la importancia de consistencia absoluta.
+
+\subsection{Tolerancia a Particiones}
+
+Un sistema tolerante a particiones continúa operando incluso cuando la comunicación entre nodos falla debido a problemas de red, cortes de energía, o fallos de hardware. Esta propiedad reconoce la realidad de que las redes distribuidas experimentarán eventualmente particiones.
+
+La importancia crucial del teorema reside en que en presencia de una partición de red, evento inevitable, debe elegirse entre consistencia y disponibilidad. No es posible garantizar las tres propiedades simultáneamente en un sistema distribuido.
+
+En la práctica, dado que las particiones de red son inevitables, la elección real se reduce a: CP (priorizar consistencia a costa de disponibilidad) o AP (priorizar disponibilidad a costa de consistencia).
+
+Para aplicaciones donde la consistencia es crítica, los sistemas optan por CP, haciendo el sistema temporalmente no disponible durante particiones pero garantizando consistencia de datos. Para aplicaciones donde la disponibilidad es más importante, como redes sociales, los sistemas optan por AP, permitiendo acceso a datos potencialmente desactualizados durante particiones.
+
+\section{Ejemplos de Bases de Datos}
+
+Diferentes bases de datos implementan diferentes puntos del espectro CAP:
+
+Las bases de datos relacionales tradicionales como MySQL, PostgreSQL y Oracle priorizan Consistencia y Disponibilidad (CA en ausencia de particiones), ofreciendo transacciones ACID y operación monolítica o con replicación síncrona.
+
+Bases de datos como Redis, MongoDB y HBase implementan el punto CP, sacrificando disponibilidad durante particiones para garantizar consistencia. Zookeeper, utilizado por Hadoop y otros sistemas, ejemplifica este enfoque.
+
+Bases de datos como Cassandra y DynamoDB implementan AP, priorizando disponibilidad y tolerando inconsistencias eventualmente resueltas, siendo adecuadas para aplicaciones donde la disponibilidad supera la importancia de consistencia inmediata.
+
+\chapter{Gestión de Concurrencia en Aplicaciones Distribuidas}
+
+La concurrencia en aplicaciones distribuidas presenta desafíos únicos que requieren técnicas específicas para mantener la integridad de los datos y el rendimiento del sistema.
+
+\section{Conceptos Fundamentales}
+
+La concurrencia se define como la capacidad de un sistema para ejecutar múltiples tareas simultáneamente, ya sea efectivamente en paralelo mediante múltiples núcleos de procesamiento, o aparentemente mediante intercalación de ejecución. En sistemas distribuidos, la concurrencia se manifiesta tanto a nivel de aplicaciones individuales como entre múltiples nodos del sistema.
+
+La concurrencia mejora el rendimiento al aprovechar recursos disponibles, como múltiples núcleos de CPU o conexiones de red simultáneas. Sin embargo, introduce desafíos únicos que deben abordarse cuidadosamente.
+
+Las condiciones de carrera ocurren cuando múltiples tareas acceden simultáneamente a un recurso compartido y el resultado depende del orden de ejecución. Este fenómeno puede producir resultados erráticos y difíciles de reproducir, como estados inconsistentes en bases de datos o transacciones financieras incorrectas.
+
+Los deadlocks ocurren cuando dos o más procesos se bloquean mutuamente, cada uno esperando que el otro libere un recurso. Los sistemas distribuidos amplían este problema, ya que pueden involucrar múltiples servicios esperando recursos entre sí.
+
+La inanición ocurre cuando un proceso nunca obtiene acceso a los recursos que necesita para continuar, frecuentemente debido a la priorización de otros procesos.
+
+\section{Concurrencia en Cassandra}
+
+Apache Cassandra prioriza consistencia sobre disponibilidad en su diseño. El modelo de consistencia configurable de Cassandra permite a los operadores elegir el balance específico entre consistencia y disponibilidad según los requerimientos de cada operación.
+
+Esta decisión de diseño refleja la filosofía de que para ciertas aplicaciones, como sistemas financieros, la consistencia absoluta resulta no negociable, mientras que para otras aplicaciones, como análisis de redes sociales, la disponibilidad resulta más crítica que la consistencia inmediata.
+
+\chapter{Conclusiones}
+
+Las aplicaciones distribuidas constituyen el paradigma predominante para el desarrollo de sistemas modernos. A lo largo de este informe, hemos explorado los fundamentos teóricos, las ventajas y desafíos, la evolución histórica, y las técnicas fundamentales que sustentan este campo del conocimiento.
+
+Los conceptos explorados, desde la distinción básica entre programa, aplicación y sistema, pasando por las ventajas de escalabilidad y disponibilidad, las falacias que deben evitarse, el teorema CAP que establece los límites fundamentales, y las técnicas de gestión de concurrencia, proporcionan la base conceptual para diseñar y mantener sistemas distribuidos robustos.
+
+La comprensión profunda de estos conceptos resulta esencial para cualquier profesional de ingeniería de software. Los sistemas distribuidos presentan desafíos significativos que no existen en sistemas centralizados, pero también ofrecen capacidades imposibles de lograr de otra manera.
+
+El campo continúa evolucionando rápidamente, con nuevos patrones arquitectónicos, herramientas y mejores prácticas emergiendo constantemente. Los principios fundamentales explorados en este informe proporcionan la base conceptual necesaria para adoptar estas innovaciones efectivamente.
+
+El profesional de ingeniería de software que domine estos conceptos estará preparado para abordar los desafíos de diseño, implementación y mantenimiento de sistemas distribuidos modernos, contribuyendo al desarrollo de aplicaciones que dan soporte a las aplicaciones críticas que la sociedad contemporánea depende.
+
+\chapter{Bibliografía}
+
+\begin{thebibliography}{99}
+
+bibitem{lamport14}
+Leslie Lamport.
+\newblock \emph{Distributed Systems: Concepts and Design}.
+\newblock Addison-Wesley, 2014.
+
+bibitem{tanenbaum14}
+Andrew S. Tanenbaum y Maarten van Steen.
+\newblock \emph{Distributed Systems}.
+\newblock Pearson, 2014.
+
+bibitem{brewer}
+Eric A. Brewer.
+\newblock Towards Robust Distributed Systems.
+\newblock \emph{PODC Keynote}, 2000.
+
+bibitem{ghemawat}
+Sanjay Ghemawat, Howard Gobioff, y Shun-Tak Leung.
+\newblock The Google File System.
+\newblock \emph{SOSP}, 2003.
+
+bibitem{chang}
+Fay Chang, Jeffrey Dean, Sanjay Ghemawat, Wilson C. Hsieh, Jeff Dean, et al.
+\newblock Bigtable: A Distributed Storage System for Structured Data.
+\newblock \emph{OSDI}, 2006.
+
+\end{thebibliography}
+
+\appendix
+\chapter{Glosario de Términos}
+
+\begin{description}
+\item[API] Interfaz de Programación de Aplicaciones - conjunto de definiciones y protocolos para construir aplicaciones de software.
+
+\item[CA] Consistencia + Disponibilidad - configuración de base de datos que prioriza ambas propiedades cuando no hay particiones.
+
+\item[CAP] Teorema que establece los límites de sistemas distribuidos: Consistencia, Disponibilidad, Tolerancia a Particiones.
+
+\item[CD] Despliegue Continuo - despliegue continuo de cambios a producción.
+
+\item[CI] Integración Continua - integración continua de código.
+
+\item[Circuit Breaker] Patrón de diseño que previene fallos en cascada.
+
+\item[Cloud Computing] Modelo de computación que ofrece recursos como servicio a través de la red.
+
+\item[Contenedor] Paquete autonome que incluye aplicación y sus dependencias.
+
+\item[CORBA] Common Object Request Broker Architecture - estándar para comunicación entre objetos.
+
+\item[Docker] Plataforma para crear y ejecutar contenedores.
+
+\item[Edge Computing] Paradigma que acerca el procesamiento a la fuente de datos.
+
+\item[Event-Driven] Arquitectura donde los componentes reaccionan a eventos.
+
+\item[GitOps] Gestión de infraestructura mediante Git.
+
+\item[HTTP] Hypertext Transfer Protocol - protocolo de la web.
+
+\item[IaaS] Infraestructura como Servicio - infraestructura como servicio.
+
+\item[IoT] Internet de las Cosas - red de dispositivos físicos conectados.
+
+\item[Kubernetes] Sistema de orquestación de contenedores.
+
+\item[Latencia] Tiempo de retraso en comunicación.
+
+\item[Microservicios] Arquitectura que divide aplicaciones en servicios pequeños.
+
+\item[Middleware] Software intermedio que conecta aplicaciones.
+
+\item[NoSQL] Bases de datos no relacionales.
+
+\item[PaaS] Plataforma como Servicio - plataforma como servicio.
+
+\item[REST] Estilo arquitectónico para servicios web.
+
+\item[SaaS] Software como Servicio - software como servicio.
+
+\item[Serverless] Modelo de computación sin gestión de servidores.
+
+\item[Service Mesh] Capa de infraestructura para comunicación entre servicios.
+
+\item[SOA] Arquitectura Orientada a Servicios - arquitectura orientada a servicios.
+
+\item[SOAP] Simple Object Access Protocol - protocolo para servicios web XML.
+
+\item[SQL] Structured Query Language - lenguaje para bases de datos relacionales.
+
+\item[2PC] Two-Phase Commit - protocolo de compromiso en dos fases.
+
+\item[3PC] Three-Phase Commit - protocolo de compromiso en tres fases.
+
+\end{description}
+
+\end{document}
